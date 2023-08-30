@@ -18,6 +18,18 @@ class Joueur:
                f" Date de naissance : {self.date_of_birth}," \
                f" Classement : {self.classement}"
 
+    def total_score(self, tournament):
+        total = 0
+        for ronde in tournament.turns:
+            for game in ronde.matchs:
+                player1, score1 = game.match[0]
+                player2, score2 = game.match[1]
+                if player1 == self:
+                    total += score1
+                elif player2 == self:
+                    total += score2
+        return total
+
 
 # Définir une classe 'Tournoi' pour représenter un tournoi d'échecs
 class Tournoi:
@@ -33,7 +45,6 @@ class Tournoi:
         self.remarques = ""  # Remarques concernant le tournoi
 
     """Ajoute un tour au tournoi."""
-
     def add_turn(self, turn):
         self.turns.append(turn)  # Ajouter un tour à la liste des tours du tournoi
 
@@ -48,26 +59,6 @@ class Tournoi:
         self.end_date = datetime.now()  # Mettre à jour la date de fin du tournoi avec la date et l'heure actuelles
         for turn in self.turns:
             turn.mark_as_done()  # Marquer tous les tours du tournoi comme terminés
-
-
-# Définir une classe 'Tour' pour représenter un tour dans le tournoi
-class Tour:
-    def __init__(self, number):
-        self.number = number  # Numéro du tour
-        self.start_date_time = datetime.now()  # Date et heure de début du tour (initialisée à l'instant présent)
-        self.end_date_time = None  # Date et heure de fin du tour (initialisée à 'None' car le tour n'est pas encore
-        # terminé)
-        self.rondes = []  # Liste des rondes dans le tour
-
-    def add_ronde(self, ronde):
-        """Ajoute une ronde au tour."""
-        self.rondes.append(ronde)  # Ajouter une ronde à la liste des rondes du tour
-        ronde.start_date_time = datetime.now()  # Mettre à jour la date et l'heure de début de la ronde avec
-        # l'instant présent
-
-    def mark_done(self):
-        """Marque le tour comme terminé et met à jour la date de fin."""
-        self.end_date_time = datetime.now()  # Mettre à jour la date et l'heure de fin du tour avec l'instant présent
 
 
 # Définir une classe 'Ronde' pour représenter une ronde dans un tour

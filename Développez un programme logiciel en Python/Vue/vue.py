@@ -4,10 +4,9 @@
 # Définir la classe VueClassement pour afficher les classements des joueurs dans un tournoi
 class VueClassement:
     def display_classement(self, tournament):
-        """Trier les joueurs en fonction de leur classement"""
-        classement = sorted(tournament.player_register, key=lambda player_tri: player_tri.classement)
+        classement = sorted(tournament.player_register, key=lambda player: player.total_score(tournament), reverse=True)
         for index, player in enumerate(classement, 1):
-            print(f"{index}. {player}")
+            print(f"{index}. {player.first_name} {player.name} - Score: {player.total_score(tournament)}")
 
 
 # Définir la classe VueAppariements pour afficher les appariements des parties pour une ronde donnée
