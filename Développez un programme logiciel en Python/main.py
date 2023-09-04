@@ -1,46 +1,15 @@
 import os
 import random
-
 from Vue.vue import VueClassement, VueAppariements
 from Controleur.controleur import ControllerPartie, ControllerTournoi
-from Modèle.modele import Joueur, Tournoi, Ronde, Partie
+from Modèle.modele import Joueur, Tournoi, Partie
 
+# Création d'une liste pour stocker les joueurs
+players = []
 
-# Création des instances de joueurs (remplacer par vos données réelles)
-player1 = Joueur("Alice", "Wonderland", "2000-01-01", 1500)
-player2 = Joueur("Bob", "Builder", "2000-01-02", 1400)
-player3 = Joueur("Eve", "Green", "2000-01-03", 1600)
-player4 = Joueur("Carl", "Johnson", "2000-01-04", 1450)
-
-# Création des instances de parties (matchs)
-game_1 = Partie(player1, 0, player2, 0)
-game_2 = Partie(player3, 0, player4, 0)
-
-game_3 = Partie(player1, 0, player3, 0)
-game_4 = Partie(player2, 0, player4, 0)
-
-game_5 = Partie(player1, 0, player4, 0)
-game_6 = Partie(player2, 0, player3, 0)
-
-# Création des instances de rondes et ajout des matchs
-ronde_1 = Ronde(1)
-ronde_1.matchs = [game_1, game_2]
-
-ronde_2 = Ronde(2)
-ronde_2.matchs = [game_3, game_4]
-
-ronde_3 = Ronde(3)
-ronde_3.matchs = [game_5, game_6]
-
-# Création du tournoi et ajout des rondes
-create_tournament = Tournoi("Tournoi d'échecs", "Salle des échecs", "2023-07-17", "2023-07-24")
-create_tournament.turns = [ronde_1, ronde_2, ronde_3]
-
-# Inscription des joueurs au tournoi
-create_tournament.player_register = [player1, player2, player3, player4]
-
-# Création du contrôleur de tournoi
-controller_tournament = ControllerTournoi(create_tournament)
+# Définition initiale du tournoi et du contrôleur de tournoi
+create_tournament = None
+controller_tournament = None
 
 
 # Fonction pour simuler les matchs d'une ronde
@@ -79,12 +48,13 @@ while True:
     print("\nMenu:")
     print("1. Création du tournoi")
     print("2. Inscription des joueurs")
-    print("3. Appliquer le nombre de rounds")
-    print("4. Lancement du tournoi")
-    print("5. Simuler les matchs d'une ronde")
-    print("6. Affichage du classement des joueurs")
-    print("7. Affichage des appariements d'une ronde")
-    print("8. Quitter")
+    print("3. Ajouter un Round")
+    print("4. Simuler les matchs d'une ronde")
+    print("5. Affichage du classement des joueurs")
+    print("6. Affichage du score d'une ronde")
+    print("7. Affichage des informations du tournoi actuelle")
+    print("8. Fin du tournoi")
+    print("9. Quitter")
 
     choice = input("Sélectionnez une option : ")
 
@@ -102,43 +72,71 @@ while True:
 
     elif choice == "2":
         os.system('cls' if os.name == 'nt' else 'clear')
-        """Inscription d'un joueur"""
-        first_name = input("Entrez le prénom du joueur : ")
-        last_name = input("Entrez le nom du joueur : ")
-        date_of_birth = input("Entrez la date de naissance du joueur (YYYY-MM-DD) : ")
-        classement = float(input("Entrez le classement du joueur : "))
-        new_player = Joueur(first_name, last_name, date_of_birth, classement)
-        controller_tournament.register_player(new_player)
-        print("Joueur inscrit avec succès !")
+        """Inscription des joueurs"""
+        if len(players) >= 8:
+            print("Le nombre maximum de joueurs (8) est atteint.")
+        else:
+            first_name = input("Entrez le prénom du joueur : ")
+            last_name = input("Entrez le nom du joueur : ")
+            date_of_birth = input("Entrez la date de naissance du joueur (YYYY-MM-DD) : ")
+            classement = float(input("Entrez le classement du joueur : "))
+            new_player = Joueur(first_name, last_name, date_of_birth, classement)
+
+            # Vérification pour éviter l'inscription d'un même joueur plusieurs fois
+            if new_player not in players:
+                players.append(new_player)
+                if create_tournament:
+                    create_tournament.player_register.append(new_player)
+                print("Joueur inscrit avec succès !")
+            else:
+                print("Ce joueur est déjà inscrit.")
 
     elif choice == "3":
         os.system('cls' if os.name == 'nt' else 'clear')
         """Création d'un round"""
-        ronde_controller = controller_tournament.create_ronde()
-        print(f"Ronde {ronde_controller.number_ronde} créée !")
+        if create_tournament:
+            ronde_controller = controller_tournament.create_ronde()
+            print(f"Ronde {ronde_controller.number_ronde} créée !")
+            # Création des instances de parties (matchs) si la liste players contient suffisamment de joueurs
+            if len(players) >= 4:
+                round_matches = []
+                # Assurez-vous que le nombre de joueurs inscrits est pair
+                if len(players) % 2 != 0:
+                    print("Le nombre de joueurs inscrits n'est pas pair, certains joueurs ne joueront pas cette ronde.")
+                # Créez des matchs en paires de joueurs
+                for i in range(0, len(players), 2):
+                    if i + 1 < len(players):
+                        game = Partie(players[i], 0, players[i + 1], 0)
+                        round_matches.append(game)
+                ronde_controller.matchs = round_matches
+                # Retirez les joueurs de la liste create_tournament.player_register
+                if create_tournament:
+                    for match in round_matches:
+                        player1, player2 = match.match[0], match.match[1]
+                        if player1 in create_tournament.player_register:
+                            create_tournament.player_register.remove(player1)
+                        if player2 in create_tournament.player_register:
+                            create_tournament.player_register.remove(player2)
+            else:
+                print("Il n'y a pas suffisamment de joueurs inscrits pour créer des matchs.")
+        else:
+            print("Veuillez d'abord créer un tournoi.")
 
     elif choice == "4":
-        os.system('cls' if os.name == 'nt' else 'clear')
-        """Lancement du tournoi"""
-        create_tournament.mark_as_done()
-        print("Le tournoi est marqué comme terminé.")
-
-    elif choice == "5":
         os.system('cls' if os.name == 'nt' else 'clear')
         """Simulation des matchs d'une ronde"""
         round_number = int(input("Entrez le numéro de la ronde : "))
         ronde_controller = create_tournament.turns[round_number - 1]
         simuler_matchs(ronde_controller)
 
-    elif choice == "6":
-
+    elif choice == "5":
         os.system('cls' if os.name == 'nt' else 'clear')
         """Affichage du classement des joueurs"""
         vue_classement = VueClassement()
         vue_classement.display_classement(create_tournament)
         input("Appuyez sur Entrée pour continuer...")
 
-    elif choice == "7":
+    elif choice == "6":
         os.system('cls' if os.name == 'nt' else 'clear')
         """Affichage des appariements d'une ronde"""
         round_number = int(input("Entrez le numéro de la ronde : "))
@@ -147,7 +145,33 @@ while True:
         vue_appariements.display_appariements(ronde_controller)
         input("Appuyez sur Entrée pour continuer...")
 
+    elif choice == "7":
+        os.system('cls' if os.name == 'nt' else 'clear')
+        # Afficher les informations sur le tournoi
+        if create_tournament is None:
+            print("Aucun tournoi n'a été créé. Veuillez d'abord créer un tournoi.")
+        else:
+            print("Tournoi :", create_tournament.name_tournament)
+            print("Lieu :", create_tournament.place)
+            print("Date de début :", create_tournament.start_date)
+            print("Date de fin :", create_tournament.end_date)
+            print("Nombre de tours :", create_tournament.number_turn)
+            print("Tour actuel :", create_tournament.current_turn)
+            print("Remarques :", create_tournament.remarques)
+
+        # Afficher le classement même si le tournoi est marqué comme terminé
+        if create_tournament.is_done:
+            vue_classement = VueClassement()
+            vue_classement.display_classement(create_tournament)
+
     elif choice == "8":
+        os.system('cls' if os.name == 'nt' else 'clear')
+        """Fin du tournoi"""
+        create_tournament.mark_as_done()
+        print("Le tournoi est marqué comme terminé.")
+        print()
+
+    elif choice == "9":
         """Quitter le programme"""
         os.system('cls' if os.name == 'nt' else 'clear')
         print("Fermeture...")
@@ -156,13 +180,3 @@ while True:
     else:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("Choix invalide. Veuillez sélectionner une option valide.")
-
-
-# Afficher les informations sur le tournoi
-print("Tournoi :", create_tournament.name_tournament)
-print("Lieu :", create_tournament.place)
-print("Date de début :", create_tournament.start_date)
-print("Date de fin :", create_tournament.end_date)
-print("Nombre de tours :", create_tournament.number_turn)
-print("Tour actuel :", create_tournament.current_turn)
-print("Remarques :", create_tournament.remarques)

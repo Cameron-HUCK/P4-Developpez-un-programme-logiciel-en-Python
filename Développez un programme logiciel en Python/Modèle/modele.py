@@ -34,15 +34,16 @@ class Joueur:
 # Définir une classe 'Tournoi' pour représenter un tournoi d'échecs
 class Tournoi:
     def __init__(self, name_tournament, place, start_date, end_date, number_turn=4, current_turn=1):
-        self.name_tournament = name_tournament  # Nom du tournoi
-        self.place = place  # Lieu du tournoi
-        self.start_date = start_date  # Date de début du tournoi
-        self.end_date = end_date  # Date de fin du tournoi
-        self.number_turn = number_turn  # Nombre de tours dans le tournoi (par défaut 4)
-        self.current_turn = current_turn  # Tour actuel du tournoi (initialisé à 1)
-        self.player_register = []  # Liste des joueurs inscrits au tournoi
-        self.turns = []  # Liste des tours du tournoi
-        self.remarques = ""  # Remarques concernant le tournoi
+        self.name_tournament = name_tournament
+        self.place = place
+        self.start_date = start_date
+        self.end_date = end_date
+        self.number_turn = number_turn
+        self.current_turn = current_turn
+        self.player_register = []
+        self.turns = []
+        self.remarques = ""
+        self.is_done = False  # Ajout de l'attribut is_done
 
     """Ajoute un tour au tournoi."""
     def add_turn(self, turn):
@@ -59,6 +60,7 @@ class Tournoi:
         self.end_date = datetime.now()  # Mettre à jour la date de fin du tournoi avec la date et l'heure actuelles
         for turn in self.turns:
             turn.mark_as_done()  # Marquer tous les tours du tournoi comme terminés
+            self.is_done = True
 
 
 # Définir une classe 'Ronde' pour représenter une ronde dans un tour

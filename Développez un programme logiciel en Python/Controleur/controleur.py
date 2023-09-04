@@ -7,7 +7,7 @@ class ControllerTournoi:
     def __init__(self, controller_tournament):
         self.controller_tournament = controller_tournament
 
-    def subscribe_player(self, player_tournament):
+    def register_player(self, player_tournament):
         """Ajouter un joueur au tournoi"""
         self.controller_tournament.register_player(player_tournament)
 
