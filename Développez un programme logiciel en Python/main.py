@@ -1,4 +1,5 @@
 import os
+import json
 import random
 from Vue.vue import VueClassement, VueAppariements
 from Controleur.controleur import ControllerPartie, ControllerTournoi
@@ -59,7 +60,6 @@ while True:
     choice = input("Sélectionnez une option : ")
 
     if choice == "1":
-        os.system('cls' if os.name == 'nt' else 'clear')
         """Création d'un nouveau tournoi"""
         name_tournament = input("Entrez le nom du tournoi : ")
         place = input("Entrez le lieu du tournoi : ")
@@ -71,7 +71,6 @@ while True:
         print("Tournoi créé !")
 
     elif choice == "2":
-        os.system('cls' if os.name == 'nt' else 'clear')
         """Inscription des joueurs"""
         if len(players) >= 8:
             print("Le nombre maximum de joueurs (8) est atteint.")
@@ -92,7 +91,6 @@ while True:
                 print("Ce joueur est déjà inscrit.")
 
     elif choice == "3":
-        os.system('cls' if os.name == 'nt' else 'clear')
         """Création d'un round"""
         if create_tournament:
             ronde_controller = controller_tournament.create_ronde()
@@ -130,14 +128,12 @@ while True:
         simuler_matchs(ronde_controller)
 
     elif choice == "5":
-        os.system('cls' if os.name == 'nt' else 'clear')
         """Affichage du classement des joueurs"""
         vue_classement = VueClassement()
         vue_classement.display_classement(create_tournament)
         input("Appuyez sur Entrée pour continuer...")
 
     elif choice == "6":
-        os.system('cls' if os.name == 'nt' else 'clear')
         """Affichage des appariements d'une ronde"""
         round_number = int(input("Entrez le numéro de la ronde : "))
         ronde_controller = create_tournament.turns[round_number - 1]
@@ -146,7 +142,6 @@ while True:
         input("Appuyez sur Entrée pour continuer...")
 
     elif choice == "7":
-        os.system('cls' if os.name == 'nt' else 'clear')
         # Afficher les informations sur le tournoi
         if create_tournament is None:
             print("Aucun tournoi n'a été créé. Veuillez d'abord créer un tournoi.")
@@ -169,7 +164,58 @@ while True:
         """Fin du tournoi"""
         create_tournament.mark_as_done()
         print("Le tournoi est marqué comme terminé.")
-        print()
+        # Générer un fichier JSON avec les données du tournoi
+        tournament_data = {
+            "name_tournament": create_tournament.name_tournament,
+            "place": create_tournament.place,
+            "start_date": create_tournament.start_date,
+            "end_date": create_tournament.end_date,
+            "number_turns": create_tournament.number_turn,
+            "current_turn": create_tournament.current_turn,
+            "player_register": [
+                {
+                    "first_name": player.first_name,
+                    "name": player.name,
+                    "date_of_birth": player.date_of_birth,
+                    "classement": player.classement
+                }
+                for player in create_tournament.player_register
+            ],
+            "turns": [
+                {
+                    "number_ronde": turn.number_ronde,
+                    "matchs": [
+                        {
+                            "match": [
+                                [
+                                    player1.first_name,
+                                    player1.name,
+                                    player1.date_of_birth,
+                                    player1.classement
+                                ],
+                                [
+                                    player2.first_name,
+                                    player2.name,
+                                    player2.date_of_birth,
+                                    player2.classement
+                                ],
+                                [score1, score2]
+                            ]
+                        }
+                        for game in turn.matchs
+                        for player1, score1, player2, score2 in [
+                            (game.match[0][0], game.match[0][1], game.match[1][0], game.match[1][1])
+                        ]
+                    ]
+                }
+                for turn in create_tournament.turns
+            ],
+            "remarques": create_tournament.remarques,
+            "is_done": create_tournament.is_done
+        }
+        with open("tournament_data.json", "w") as json_file:
+            json.dump(tournament_data, json_file)
+        print("Les données du tournoi ont été sauvegardées")
 
     elif choice == "9":
         """Quitter le programme"""
